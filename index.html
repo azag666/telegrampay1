@@ -41,9 +41,20 @@
             color: #495057;
         }
 
-        .form-control-range {
+        /* Removendo .form-control-range, pois agora será um input number padrão */
+        .form-control { /* Estilo padrão do Bootstrap para inputs */
             width: 100%;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
         }
+
 
         .selected-amount {
             text-align: center;
@@ -179,11 +190,11 @@
 <body>
     <div class="checkout-container">
         <h2>TelegramPay</h2>
-        <p class="mb-3 text-center text-muted">Selecione o valor da sua contribuição.</p>
+        <p class="mb-3 text-center text-muted">Digite o valor da sua contribuição.</p>
 
         <div class="form-group">
             <label for="valorDoacao">Valor (R$):</label>
-            <input type="range" class="form-control-range" id="valorDoacao" min="4" max="150" value="4" step="1">
+            <input type="number" class="form-control" id="valorDoacao" min="4" max="150" value="4" step="0.01">
             <p class="selected-amount" id="valorSelecionado">R$ 4,00</p>
         </div>
 
@@ -210,7 +221,7 @@
     <div id="notification" class="notification" style="display: none;">Código PIX copiado!</div>
 
     <script>
-        const apiKey = "40224|J6oUOXvqNsdAhgNxSaXiHKFKBCuyeSnQLBV5lUTv6c0484ea"; // Novo API Key
+        const apiKey = "40224|J6oUOXvqNsdAhgNxSaXiHKFKBCuyeSnQLBV5lUTv6c0484ea"; 
         let transactionId = null;
         let notificou = false;
         let valorSelecionado = 4; // Valor inicial ajustado para o novo mínimo
@@ -221,42 +232,65 @@
         const codigoPixDiv = document.getElementById('codigoPix');
         const botaoAcessoLink = document.getElementById('botaoAcesso');
         const confirmacaoPagamentoDiv = document.getElementById('confirmacaoPagamento');
-        // const upsellContainerDiv = document.getElementById('upsellContainer'); // Removido, não é mais usado
 
-        // Função para obter o click_id da URL
         function getClickIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('start');
         }
 
-        // Inicializa o clickId ao carregar a página
         window.onload = function() {
             clickId = getClickIdFromUrl();
             console.log('Click ID obtido da URL:', clickId);
+            // Atualiza o valor inicial no texto exibido para corresponder ao input min
+            valorDoacaoInput.value = valorSelecionado;
+            updateValorSelecionadoText();
         };
 
+        // Event listener para o input de número
         valorDoacaoInput.addEventListener('input', function() {
-            valorSelecionado = parseFloat(this.value);
+            // Garante que o valor digitado esteja dentro dos limites
+            let val = parseFloat(this.value);
+            if (isNaN(val) || val < parseFloat(this.min)) {
+                val = parseFloat(this.min);
+            } else if (val > parseFloat(this.max)) {
+                val = parseFloat(this.max);
+            }
+            this.value = val; // Atualiza o input para o valor ajustado
+            valorSelecionado = val;
+            updateValorSelecionadoText();
+        });
+
+        // Função para atualizar o texto do valor selecionado
+        function updateValorSelecionadoText() {
             const valorFormatado = valorSelecionado.toFixed(2).replace('.', ',');
             valorSelecionadoTexto.textContent = `R$ ${valorFormatado}`;
-        });
+        }
+
 
         function converterParaCentavos(valor) {
             return Math.round(parseFloat(valor) * 100);
         }
 
-        // Função para gerar PIX diretamente, sem upsell
         async function gerarPixDireto() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('gerarBotao').disabled = true;
 
-            await gerarPix(valorSelecionado).finally(() => { // Usa o valor selecionado diretamente
+            // Validação final do valor antes de gerar o PIX
+            let valorInput = parseFloat(valorDoacaoInput.value);
+            if (isNaN(valorInput) || valorInput < 4 || valorInput > 150) {
+                alert("Por favor, digite um valor entre R$ 4,00 e R$ 150,00.");
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('gerarBotao').disabled = false;
+                return;
+            }
+            valorSelecionado = valorInput; // Garante que o valor usado é o validado
+
+            await gerarPix(valorSelecionado).finally(() => { 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('gerarBotao').disabled = false;
             });
         }
 
-        // Funções de envio para sua API (mantidas como estão, assumindo que já funcionam com a correção no ManyChat)
         async function enviarDadosParaApiUpdateConversion(pixId, pixValue) {
             if (!clickId) {
                 console.warn('Click ID não disponível. Não foi possível enviar dados para updateConversion.');
@@ -326,13 +360,11 @@
 
                 console.log("Dados da API (gerarPix):", data);
 
-                if (response.ok && data && data.qr_code && data.id) { // Adicionado 'response.ok' para melhor verificação de sucesso
+                if (response.ok && data && data.qr_code && data.id) {
                     transactionId = data.id;
-                    document.getElementById('pixCode').value = data.qr_code; // Usamos qr_code como código PIX
-                    codigoPixDiv.style.display = 'block'; // Exibe a seção do código PIX
-                    // upsellContainerDiv.style.display = 'none'; // Removido, não é mais usado
+                    document.getElementById('pixCode').value = data.qr_code;
+                    codigoPixDiv.style.display = 'block';
 
-                    // *** NOVO: Enviar PIX ID e Valor para sua API ***
                     await enviarDadosParaApiUpdateConversion(data.id, valor);
 
                 } else if (data && data.message) {
@@ -346,8 +378,6 @@
             }
         }
         
-        // gerarPixComUpsell e exibirUpsell removidos
-
         async function verificarPagamento() {
             if (!transactionId) {
                 console.warn("Nenhuma transação para verificar.");
@@ -373,7 +403,6 @@
                     confirmacaoPagamentoDiv.style.display = 'block';
                     botaoAcessoLink.style.display = 'block';
 
-                    // *** NOVO: Enviar Confirmação de Pagamento para sua API ***
                     await enviarConfirmacaoPagamentoParaApi();
 
                     setTimeout(() => {
@@ -405,7 +434,6 @@
 
                     if (!notificou) {
                         notificou = true;
-                        // Use valorSelecionado para notificação, pois aceitouUpsell foi removido
                         const valor = parseFloat(valorDoacaoInput.value).toFixed(2).replace('.', ','); 
                         fetch(`https://api.pushcut.io/JX60URSeGYXjFKP4bbP9P/notifications/Pix%20Gerado%20R$${valor}`);
                     }
