@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TelegramPay - Doação Segura via PIX</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" xintegrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <style>
         body {
             background-color: #f8f9fa;
@@ -41,8 +41,8 @@
             color: #495057;
         }
 
-        /* Removendo .form-control-range, pois agora será um input number padrão */
-        .form-control { /* Estilo padrão do Bootstrap para inputs */
+        /* Estilo para o input de valor */
+        .form-control {
             width: 100%;
             padding: .375rem .75rem;
             font-size: 1rem;
@@ -53,15 +53,7 @@
             border: 1px solid #ced4da;
             border-radius: .25rem;
             transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-        }
-
-
-        .selected-amount {
-            text-align: center;
-            font-size: 1.2em;
-            color: #007bff;
-            margin-top: 10px;
-            font-weight: bold;
+            text-align: center; /* Centraliza o texto digitado */
         }
 
         .btn-primary {
@@ -69,11 +61,6 @@
             padding: 12px;
             font-size: 1em;
             border-radius: 5px;
-        }
-
-        /* Removendo estilos de upsell, pois não será mais usado */
-        #upsellContainer {
-            display: none !important; 
         }
 
         #codigoPix {
@@ -103,6 +90,19 @@
             font-size: 0.9em;
         }
 
+        #pixInstructions {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.9em;
+            color: #555;
+        }
+        #pixInstructions ol {
+            padding-left: 20px;
+        }
+        #pixInstructions li {
+            margin-bottom: 5px;
+        }
+
         #confirmacaoPagamento {
             background-color: #d4edda;
             color: #155724;
@@ -115,7 +115,7 @@
         #botaoAcesso {
             background-color: #28a745;
             margin-top: 15px;
-            display: none; /* Inicialmente oculto */
+            display: none;
             text-decoration: none;
             text-align: center;
             color: white;
@@ -190,23 +190,34 @@
 <body>
     <div class="checkout-container">
         <h2>TelegramPay</h2>
-        <p class="mb-3 text-center text-muted">Digite o valor da sua contribuição.</p>
+        <p class="mb-3 text-center text-muted">Digite o valor da sua contribuição Minimo R$4,00.</p>
 
         <div class="form-group">
             <label for="valorDoacao">Valor (R$):</label>
-            <input type="number" class="form-control" id="valorDoacao" min="4" max="150" value="4" step="0.01">
-            <p class="selected-amount" id="valorSelecionado">R$ 4,00</p>
+            <!-- Campo de input numérico para o usuário digitar o valor -->
+            <input type="number" class="form-control" id="valorDoacao" min="4" max="150" step="1" placeholder="Ex: 10">
+            <!-- Removido o <p id="valorSelecionadoTexto"> pois o valor será exibido no próprio input -->
         </div>
 
         <button id="gerarBotao" class="btn btn-primary btn-block" onclick="gerarPixDireto()">Gerar PIX para Pagamento</button>
         <p id="loading" style="display: none;">Gerando PIX, aguarde...</p>
 
-        <div id="upsellContainer" style="display: none;"></div> 
-
         <div id="codigoPix">
             <p>Copie o código PIX abaixo para realizar o pagamento:</p>
             <input type="text" class="form-control" id="pixCode" readonly>
             <button onclick="copiarPix()" class="btn btn-outline-secondary btn-block mt-2">Copiar Código PIX</button>
+            
+            <div id="pixInstructions">
+                <p><strong>Instruções de Pagamento:</strong></p>
+                <ol>
+                    <li>Abra o aplicativo do seu banco ou carteira digital.</li>
+                    <li>Procure pela opção "PIX Copia e Cola" ou "Pagar com QR Code".</li>
+                    <li>Cole o código copiado no campo indicado.</li>
+                    <li>Confirme o valor e o beneficiário.</li>
+                    <li>Finalize o pagamento.</li>
+                </ol>
+                <p class="text-muted mt-2">Seu acesso será liberado automaticamente após a confirmação do pagamento.</p>
+            </div>
         </div>
 
         <div id="confirmacaoPagamento" class="alert alert-success text-center" role="alert">✅ Pagamento Confirmado! Redirecionando...</div>
@@ -224,50 +235,29 @@
         const apiKey = "40224|J6oUOXvqNsdAhgNxSaXiHKFKBCuyeSnQLBV5lUTv6c0484ea"; 
         let transactionId = null;
         let notificou = false;
-        let valorSelecionado = 4; // Valor inicial ajustado para o novo mínimo
         let clickId = null; 
 
         const valorDoacaoInput = document.getElementById('valorDoacao');
-        const valorSelecionadoTexto = document.getElementById('valorSelecionado');
         const codigoPixDiv = document.getElementById('codigoPix');
         const botaoAcessoLink = document.getElementById('botaoAcesso');
         const confirmacaoPagamentoDiv = document.getElementById('confirmacaoPagamento');
 
+        // Função para obter o click_id da URL
         function getClickIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('start');
         }
 
+        // Inicialização ao carregar a página
         window.onload = function() {
             clickId = getClickIdFromUrl();
             console.log('Click ID obtido da URL:', clickId);
-            // Atualiza o valor inicial no texto exibido para corresponder ao input min
-            valorDoacaoInput.value = valorSelecionado;
-            updateValorSelecionadoText();
+            valorDoacaoInput.value = ''; // Começa o campo de valor em branco
+            valorDoacaoInput.focus(); // Foca no campo para o usuário digitar
         };
 
-        // Event listener para o input de número
-        valorDoacaoInput.addEventListener('input', function() {
-            // Garante que o valor digitado esteja dentro dos limites
-            let val = parseFloat(this.value);
-            if (isNaN(val) || val < parseFloat(this.min)) {
-                val = parseFloat(this.min);
-            } else if (val > parseFloat(this.max)) {
-                val = parseFloat(this.max);
-            }
-            this.value = val; // Atualiza o input para o valor ajustado
-            valorSelecionado = val;
-            updateValorSelecionadoText();
-        });
-
-        // Função para atualizar o texto do valor selecionado
-        function updateValorSelecionadoText() {
-            const valorFormatado = valorSelecionado.toFixed(2).replace('.', ',');
-            valorSelecionadoTexto.textContent = `R$ ${valorFormatado}`;
-        }
-
-
         function converterParaCentavos(valor) {
+            // Garante que o valor é um número antes de converter
             return Math.round(parseFloat(valor) * 100);
         }
 
@@ -275,17 +265,19 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('gerarBotao').disabled = true;
 
-            // Validação final do valor antes de gerar o PIX
-            let valorInput = parseFloat(valorDoacaoInput.value);
-            if (isNaN(valorInput) || valorInput < 4 || valorInput > 150) {
-                alert("Por favor, digite um valor entre R$ 4,00 e R$ 150,00.");
+            let valorDigitado = parseFloat(valorDoacaoInput.value);
+            const min = parseFloat(valorDoacaoInput.min);
+            const max = parseFloat(valorDoacaoInput.max);
+
+            // Validação do valor digitado
+            if (isNaN(valorDigitado) || !Number.isInteger(valorDigitado) || valorDigitado < min || valorDigitado > max) {
+                alert(`Por favor, digite um valor inteiro entre R$ ${min},00 e R$ ${max},00.`);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('gerarBotao').disabled = false;
                 return;
             }
-            valorSelecionado = valorInput; // Garante que o valor usado é o validado
-
-            await gerarPix(valorSelecionado).finally(() => { 
+            
+            await gerarPix(valorDigitado).finally(() => { 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('gerarBotao').disabled = false;
             });
