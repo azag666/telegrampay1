@@ -1015,23 +1015,25 @@
             localStorage.removeItem('hottrack_token');
             this.init();
         },
-
+        
         async refreshDispatches() {
             const btn = document.getElementById('refresh-dispatches-btn');
             if(btn) {
                 btn.disabled = true;
-                btn.querySelector('svg').classList.add('animate-spin');
+                const svg = btn.querySelector('svg');
+                if (svg) svg.classList.add('animate-spin');
             }
             try {
                 this.state.data.dispatches = await this.apiRequest('/api/dispatches');
                 this.navigateTo('dispatches');
-                this.showToast('Dados atualizados!', 'success');
+                this.showToast('Dados de disparos atualizados!', 'success');
             } catch (e) {
                 this.showToast('Erro ao atualizar dados.', 'error');
             } finally {
                 if(btn) {
                     btn.disabled = false;
-                    btn.querySelector('svg').classList.remove('animate-spin');
+                    const svg = btn.querySelector('svg');
+                    if (svg) svg.classList.remove('animate-spin');
                 }
             }
         },
@@ -1680,6 +1682,11 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="loader"></span> Gerando PIX...';
             try {
+                // Dispara o evento InitiateCheckout para a Meta API
+                if(typeof fbq === 'function') {
+                    fbq('track', 'InitiateCheckout');
+                }
+
                 const response = await fetch(\`\${CONFIG.API_BASE_URL}/api/pix/generate\`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.SELLER_API_KEY }, body: JSON.stringify({ value_cents: DOMElements.productPrice.dataset.valueCents, click_id: clickId }) });
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || 'Erro do servidor'); }
                 const data = await response.json();
