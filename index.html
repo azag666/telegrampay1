@@ -1026,7 +1026,7 @@
             try {
                 this.state.data.dispatches = await this.apiRequest('/api/dispatches');
                 this.navigateTo('dispatches');
-                this.showToast('Dados de disparos atualizados!', 'success');
+                this.showToast('Dados atualizados!', 'success');
             } catch (e) {
                 this.showToast('Erro ao atualizar dados.', 'error');
             } finally {
