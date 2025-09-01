@@ -1,10 +1,157 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pagamento Seguro</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');:root{--primary-color:#2c5282;--secondary-color:#e2e8f0;--success-color:#38a169;--text-color:#2d3748;--light-text-color:#718096;--background-color:#f7fafc}body{font-family:'Inter',sans-serif;background-color:var(--background-color);margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;color:var(--text-color)}.container{background-color:#fff;padding:2rem;border-radius:12px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);width:100%;max-width:420px;text-align:center;box-sizing:border-box;margin:1rem}.header h1{font-size:1.5rem;margin-bottom:.5rem}.header p{color:var(--light-text-color);margin-top:0}.timer{background-color:var(--secondary-color);color:var(--primary-color);font-weight:600;padding:.5rem 1rem;border-radius:8px;display:inline-block;margin-bottom:1.5rem}#qr-code-container{position:relative;margin:1rem 0;min-height:280px;display:flex;justify-content:center;align-items:center}#qr-code-img{border:6px solid var(--secondary-color);border-radius:8px;max-width:100%;height:auto;display:none}.loader{border:5px solid #f3f3f3;border-top:5px solid var(--primary-color);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.copy-button{background-color:var(--primary-color);color:#fff;border:none;padding:.8rem 1.5rem;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background-color .3s,transform .2s;width:100%;margin-top:1rem}.copy-button:hover{background-color:#3182ce}.copy-button:active{transform:scale(.98)}#copy-feedback{color:var(--success-color);font-weight:600;margin-top:.5rem;height:20px;visibility:hidden;opacity:0;transition:visibility 0s,opacity .5s linear}#copy-feedback.visible{visibility:visible;opacity:1}.instructions{margin-top:1.5rem;color:var(--light-text-color);font-size:.9rem}.footer{margin-top:2rem;font-size:.8rem;color:#a0aec0}.footer svg{vertical-align:middle;width:16px;height:16px;margin-right:5px}</style>
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init', '643408592112455'); fbq('track','PageView');</script>
-</head><body><div class="container"><div class="header"><h1 id="product-name">Finalize seu Pagamento</h1><p>Escaneie o QR Code ou copie o código abaixo.</p></div><div class="timer">Expira em: <span id="countdown">10:00</span></div><div id="qr-code-container"><div id="loader" class="loader"></div><img id="qr-code-img" src="" alt="PIX QR Code"></div><button class="copy-button" id="copy-btn" disabled><span id="btn-text">Carregando PIX...</span></button><div id="copy-feedback">Código PIX copiado!</div><div class="instructions">1. Abra o app do seu banco.<br>2. Escolha a opção Pagar com PIX.<br>3. Escaneie o QR Code ou use o "Copia e Cola".</div><div class="footer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg> Pagamento seguro</div></div>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{const CONFIG={API_BASE_URL:'https://novaapi-one.vercel.app',SELLER_API_KEY:'1a2c5da4-04fb-4eb4-b2d4-55f541360d4f',CHECKOUT_ID:5,PRODUCT_NAME:'Isadora ',REDIRECT_URL:'https://t.me/+bgFpfwqLlYg3N2Qx',VALUE_TYPE:'fixed',FIXED_VALUE_CENTS:15,POLLING_INTERVAL:5000,TIMER_DURATION_MINUTES:10};const qrCodeImg=document.getElementById('qr-code-img'),loader=document.getElementById('loader'),copyBtn=document.getElementById('copy-btn'),btnText=document.getElementById('btn-text'),copyFeedback=document.getElementById('copy-feedback'),countdownEl=document.getElementById('countdown');let pixCode='',transactionId='',statusCheckInterval;function displayError(message){console.error(message);loader.style.display='none';qrCodeImg.style.display='none';document.querySelector('.header h1').textContent='Ocorreu um Erro';document.querySelector('.header p').textContent=message;copyBtn.disabled=true;btnText.textContent='Erro ao Gerar PIX'}
-function startTimer(){let time=CONFIG.TIMER_DURATION_MINUTES*60;const timerInterval=setInterval(()=>{if(time<=0){clearInterval(timerInterval);countdownEl.textContent='Expirado';displayError('O tempo para pagamento expirou.');return}time--;const minutes=Math.floor(time/60).toString().padStart(2,'0');const seconds=(time%60).toString().padStart(2,'0');countdownEl.textContent=`${minutes}:${seconds}`},1000)}async function copyPixCode(){try{await navigator.clipboard.writeText(pixCode);copyFeedback.classList.add('visible');setTimeout(()=>copyFeedback.classList.remove('visible'),2000)}catch(err){console.error('Falha ao copiar:',err)}}
-async function checkPaymentStatus(){if(!transactionId)return;try{const response=await fetch(`${CONFIG.API_BASE_URL}/api/pix/status/${transactionId}`,{headers:{'x-api-key':CONFIG.SELLER_API_KEY}});if(!response.ok)return;const data=await response.json();if(data.status==='paid'||data.status==='COMPLETED'){clearInterval(statusCheckInterval);window.location.href=CONFIG.REDIRECT_URL}}catch(error){console.error('Erro ao verificar status:',error)}}
-async function generatePix(click_id,value_cents){try{const response=await fetch(`${CONFIG.API_BASE_URL}/api/pix/generate`,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':CONFIG.SELLER_API_KEY},body:JSON.stringify({value_cents,click_id})});if(!response.ok){const errorData=await response.json();throw new Error(errorData.message||'Erro do servidor')}const data=await response.json();pixCode=data.qr_code_text;transactionId=data.transaction_id;qrCodeImg.src=data.qr_code_base64;loader.style.display='none';qrCodeImg.style.display='block';copyBtn.disabled=false;btnText.textContent='Copiar Código PIX';startTimer();statusCheckInterval=setInterval(checkPaymentStatus,CONFIG.POLLING_INTERVAL);checkPaymentStatus()}catch(error){displayError(error.message||'Não foi possível gerar o PIX.')}}
-async function initializeCheckout(){try{document.getElementById('product-name').textContent=CONFIG.PRODUCT_NAME;let final_value_cents;if(CONFIG.VALUE_TYPE==='fixed'){final_value_cents=CONFIG.FIXED_VALUE_CENTS;if(!final_value_cents)return displayError('Valor do produto não configurado.')}else{const urlValue=new URLSearchParams(window.location.search).get('value');if(!urlValue)return displayError('Valor não fornecido na URL (ex: ?value=1990).');final_value_cents=parseInt(urlValue,10)}const urlParams=new URLSearchParams(window.location.search);const bodyPayload={sellerApiKey:CONFIG.SELLER_API_KEY,checkoutId:CONFIG.CHECKOUT_ID,referer:document.referrer,user_agent:navigator.userAgent,fbclid:urlParams.get('fbclid'),fbp:document.cookie.split('; ').find(row=>row.startsWith('_fbp='))?.split('=')[1],fbc:document.cookie.split('; ').find(row=>row.startsWith('_fbc='))?.split('=')[1],utm_source:urlParams.get('utm_source'),utm_campaign:urlParams.get('utm_campaign'),utm_medium:urlParams.get('utm_medium'),utm_content:urlParams.get('utm_content'),utm_term:urlParams.get('utm_term')};Object.keys(bodyPayload).forEach(key=>(bodyPayload[key]===null||bodyPayload[key]===undefined)&&delete bodyPayload[key]);const clickResponse=await fetch(CONFIG.API_BASE_URL+'/api/registerClick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(bodyPayload)});if(!clickResponse.ok)throw new Error('Falha ao rastrear o acesso.');const clickData=await clickResponse.json();await generatePix(clickData.click_id,final_value_cents)}catch(error){displayError(error.message)}}
-copyBtn.addEventListener('click',copyPixCode);initializeCheckout()});</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Seguro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root { --bg-light: #f7fafc; --bg-dark: #edf2f7; --text-primary: #1a202c; --text-secondary: #718096; --accent: #2b6cb0; --accent-dark: #2c5282; --success: #38a169; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 1rem; color: var(--text-primary); }
+        .container { background-color: #fff; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.05),0 4px 6px -2px rgba(0,0,0,.03); width: 100%; max-width: 480px; text-align: center; }
+        .header { background-color: var(--bg-dark); padding: 1.5rem; border-radius: 12px 12px 0 0; }
+        .header h1 { font-size: 1.25rem; margin: 0; }
+        .header p { color: var(--text-secondary); margin: 0.25rem 0 0; font-size: 0.875rem; }
+        .main-content { padding: 2rem; }
+        .product-summary { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background-color: var(--bg-light); border-radius: 8px; margin-bottom: 1.5rem; }
+        .product-summary span { font-weight: 600; }
+        .btn { background-color: var(--accent); color: #fff; border: none; padding: 1rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color .3s, transform .2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn:hover { background-color: var(--accent-dark); }
+        .btn:disabled { background-color: #a0aec0; cursor: not-allowed; }
+        .btn-secondary { background-color: var(--bg-dark); color: var(--accent-dark); }
+        .pix-section { display: none; margin-top: 1.5rem; border-top: 1px solid var(--bg-dark); padding-top: 1.5rem; }
+        .timer { background-color: #fefcbf; color: #92400e; font-weight: 500; padding: .5rem 1rem; border-radius: 8px; display: inline-block; margin-bottom: 1rem; font-size: 0.875rem; }
+        #qr-code-img { border: 4px solid var(--bg-dark); border-radius: 8px; max-width: 100%; height: auto; margin: 0 auto; display: block; }
+        .pix-code-wrapper { background-color: var(--bg-light); padding: 0.75rem; border-radius: 8px; margin-top: 1rem; word-break: break-all; text-align: left; font-size: 0.875rem; position: relative; }
+        .copy-button { position: absolute; top: 0.5rem; right: 0.5rem; background: #fff; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; font-size: 0.75rem; }
+        #copy-feedback { color: var(--success); font-weight: 600; margin-top: .5rem; height: 18px; font-size: 0.875rem; }
+        .instructions { margin-top: 1.5rem; color: var(--text-secondary); font-size: .875rem; text-align: left; background-color: var(--bg-light); padding: 1rem; border-radius: 8px;}
+        .instructions h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--text-primary); }
+        .instructions p { margin: 0; }
+        .footer { padding: 1.5rem; color: var(--text-secondary); font-size: .8rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+        .hidden { display: none; }
+        .loader { width: 20px; height: 20px; border: 2px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script>
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '643408592112455');
+        fbq('track', 'PageView');
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Finalize seu Pagamento</h1>
+            <p>Seu pedido está quase pronto!</p>
+        </div>
+        <div class="main-content">
+            <div class="product-summary">
+                <span id="product-name">Nome do Produto</span>
+                <span id="product-price">R$ 0,00</span>
+            </div>
+            
+            <div id="initial-view">
+                <button id="generate-pix-btn" class="btn">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01M12 18v-1m0-1.01V16m0-1.01V14m0 5v-1M5 12H4m1 0h.01M4 12h-1m21-1c0 5.523-4.477 10-10 10S1 16.523 1 11 5.477 1 11 1s10 4.477 10 10z"></path></svg>
+                    Gerar PIX Seguro
+                </button>
+            </div>
+
+            <div id="pix-section" class="pix-section">
+                <div class="timer">Seu código expira em: <span id="countdown">10:00</span></div>
+                <img id="qr-code-img" src="" alt="PIX QR Code" class="hidden">
+                <div class="pix-code-wrapper">
+                    <code id="pix-code-text"></code>
+                    <button id="copy-btn" class="copy-button">Copiar</button>
+                </div>
+                <div id="copy-feedback"></div>
+                <div class="instructions">
+                    <h3>Siga os 3 passos para pagar:</h3>
+                    <p>1. Copie o código PIX acima.</p>
+                    <p>2. Abra o app do seu banco e pague com a opção "PIX Copia e Cola".</p>
+                    <p>3. Volte aqui e clique no botão abaixo para confirmar.</p>
+                </div>
+                <button id="check-payment-btn" class="btn btn-secondary mt-4">
+                    JÁ PAGUEI, VERIFICAR AGORA
+                </button>
+            </div>
+        </div>
+        <div class="footer">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
+            Pagamento seguro e processado por HotTrack.
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const CONFIG = { API_BASE_URL: 'https://novaapi-one.vercel.app', SELLER_API_KEY: '1a2c5da4-04fb-4eb4-b2d4-55f541360d4f', CHECKOUT_ID: 6, PRODUCT_NAME: 'Isadora', REDIRECT_URL: 'https://t.me/+bgFpfwqLlYg3N2Qx', VALUE_TYPE: 'fixed', FIXED_VALUE_CENTS: 9, POLLING_INTERVAL: 4000, TIMER_DURATION_MINUTES: 10 };
+        let clickId = null, transactionId = null, pixCode = '', statusCheckInterval;
+        
+        const DOMElements = {
+            productName: document.getElementById('product-name'),
+            productPrice: document.getElementById('product-price'),
+            initialView: document.getElementById('initial-view'),
+            pixSection: document.getElementById('pix-section'),
+            generatePixBtn: document.getElementById('generate-pix-btn'),
+            qrCodeImg: document.getElementById('qr-code-img'),
+            pixCodeText: document.getElementById('pix-code-text'),
+            copyBtn: document.getElementById('copy-btn'),
+            copyFeedback: document.getElementById('copy-feedback'),
+            countdown: document.getElementById('countdown'),
+            checkPaymentBtn: document.getElementById('check-payment-btn'),
+        };
+
+        function displayError(message) { console.error(message); DOMElements.productName.textContent = 'Ocorreu um Erro'; DOMElements.productPrice.textContent = message; DOMElements.initialView.classList.add('hidden'); }
+        function startTimer() { let time = CONFIG.TIMER_DURATION_MINUTES * 60; const timerInterval = setInterval(() => { if (time <= 0) { clearInterval(timerInterval); DOMElements.countdown.textContent = 'Expirado'; return; } time--; const minutes = Math.floor(time / 60).toString().padStart(2, '0'); const seconds = (time % 60).toString().padStart(2, '0'); DOMElements.countdown.textContent = `${minutes}:${seconds}`; }, 1000); }
+        async function copyPixCode() { try { await navigator.clipboard.writeText(pixCode); DOMElements.copyFeedback.textContent = 'Código PIX copiado!'; setTimeout(() => DOMElements.copyFeedback.textContent = '', 2000); } catch (err) { DOMElements.copyFeedback.textContent = 'Falha ao copiar'; console.error(err); } }
+        async function checkPaymentStatus(showFeedback = false) { if (!transactionId) return; try { const response = await fetch(`${CONFIG.API_BASE_URL}/api/pix/status/${transactionId}`, { headers: { 'x-api-key': CONFIG.SELLER_API_KEY } }); if (!response.ok) return; const data = await response.json(); if (data.status === 'paid' || data.status === 'COMPLETED') { clearInterval(statusCheckInterval); window.location.href = CONFIG.REDIRECT_URL; } else if (showFeedback) { alert('Pagamento ainda não identificado. Tente novamente em alguns instantes.'); } } catch (error) { console.error('Erro ao verificar status:', error); } }
+        
+        async function handleGeneratePix() {
+            const btn = DOMElements.generatePixBtn;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> Gerando PIX...';
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/pix/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.SELLER_API_KEY }, body: JSON.stringify({ value_cents: DOMElements.productPrice.dataset.valueCents, click_id: clickId }) });
+                if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || 'Erro do servidor'); }
+                const data = await response.json();
+                pixCode = data.qr_code_text; transactionId = data.transaction_id;
+                DOMElements.qrCodeImg.src = data.qr_code_base64;
+                DOMElements.pixCodeText.textContent = pixCode;
+                DOMElements.initialView.classList.add('hidden');
+                DOMElements.pixSection.style.display = 'block';
+                DOMElements.qrCodeImg.classList.remove('hidden');
+                startTimer();
+                statusCheckInterval = setInterval(checkPaymentStatus, CONFIG.POLLING_INTERVAL);
+            } catch (error) { displayError(error.message || 'Não foi possível gerar o PIX.'); btn.innerHTML = 'Tentar Novamente'; btn.disabled = false; }
+        }
+
+        async function initializeCheckout() {
+            try {
+                DOMElements.productName.textContent = CONFIG.PRODUCT_NAME;
+                let finalValueCents;
+                if (CONFIG.VALUE_TYPE === 'fixed') { finalValueCents = CONFIG.FIXED_VALUE_CENTS; if (!finalValueCents) return displayError('Valor do produto não configurado.'); } else { const urlValue = new URLSearchParams(window.location.search).get('value'); if (!urlValue) return displayError('Valor não fornecido (ex: ?value=1990).'); finalValueCents = parseInt(urlValue, 10); }
+                DOMElements.productPrice.textContent = `R$ ${(finalValueCents / 100).toFixed(2).replace('.', ',')}`;
+                DOMElements.productPrice.dataset.valueCents = finalValueCents;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const bodyPayload = { sellerApiKey: CONFIG.SELLER_API_KEY, checkoutId: CONFIG.CHECKOUT_ID, referer: document.referrer, user_agent: navigator.userAgent, fbclid: urlParams.get('fbclid'), fbp: document.cookie.split('; ').find(row => row.startsWith('_fbp='))?.split('=')[1], fbc: document.cookie.split('; ').find(row => row.startsWith('_fbc='))?.split('=')[1], utm_source: urlParams.get('utm_source'), utm_campaign: urlParams.get('utm_campaign'), utm_medium: urlParams.get('utm_medium'), utm_content: urlParams.get('utm_content'), utm_term: urlParams.get('utm_term') };
+                Object.keys(bodyPayload).forEach(key => (bodyPayload[key] === null || bodyPayload[key] === undefined) && delete bodyPayload[key]);
+                
+                const clickResponse = await fetch(CONFIG.API_BASE_URL + '/api/registerClick', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyPayload) });
+                if (!clickResponse.ok) throw new Error('Falha ao rastrear o acesso.');
+                const clickData = await clickResponse.json();
+                clickId = clickData.click_id;
+
+                DOMElements.generatePixBtn.addEventListener('click', handleGeneratePix);
+                DOMElements.copyBtn.addEventListener('click', copyPixCode);
+                DOMElements.checkPaymentBtn.addEventListener('click', () => checkPaymentStatus(true));
+
+            } catch (error) { displayError(error.message); }
+        }
+        
+        initializeCheckout();
+    });
+    </script>
+</body>
+</html>
