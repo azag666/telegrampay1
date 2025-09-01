@@ -6,33 +6,33 @@
     <title>Pagamento Seguro</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        :root { --bg-light: #f7fafc; --bg-dark: #edf2f7; --text-primary: #1a202c; --text-secondary: #718096; --accent: #2b6cb0; --accent-dark: #2c5282; --success: #38a169; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 1rem; color: var(--text-primary); }
-        .container { background-color: #fff; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.05),0 4px 6px -2px rgba(0,0,0,.03); width: 100%; max-width: 480px; text-align: center; }
-        .header { background-color: var(--bg-dark); padding: 1.5rem; border-radius: 12px 12px 0 0; }
-        .header h1 { font-size: 1.25rem; margin: 0; }
-        .header p { color: var(--text-secondary); margin: 0.25rem 0 0; font-size: 0.875rem; }
-        .main-content { padding: 2rem; }
-        .product-summary { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background-color: var(--bg-light); border-radius: 8px; margin-bottom: 1.5rem; }
-        .product-summary span { font-weight: 600; }
-        .btn { background-color: var(--accent); color: #fff; border: none; padding: 1rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color .3s, transform .2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-        .btn:hover { background-color: var(--accent-dark); }
-        .btn:disabled { background-color: #a0aec0; cursor: not-allowed; }
-        .btn-secondary { background-color: var(--bg-dark); color: var(--accent-dark); }
-        .pix-section { display: none; margin-top: 1.5rem; border-top: 1px solid var(--bg-dark); padding-top: 1.5rem; animation: fadeIn 0.5s ease; }
-        .timer { background-color: #fefcbf; color: #92400e; font-weight: 500; padding: .5rem 1rem; border-radius: 8px; display: inline-block; margin-bottom: 1rem; font-size: 0.875rem; }
-        #qr-code-img { border: 4px solid var(--bg-dark); border-radius: 8px; max-width: 100%; height: auto; margin: 0 auto; display: block; }
-        .pix-code-wrapper { background-color: var(--bg-light); padding: 0.75rem; border-radius: 8px; margin-top: 1rem; word-break: break-all; text-align: left; font-size: 0.875rem; position: relative; }
-        .copy-button { position: absolute; top: 0.5rem; right: 0.5rem; background: #fff; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; font-size: 0.75rem; }
-        #copy-feedback { color: var(--success); font-weight: 600; margin-top: .5rem; height: 18px; font-size: 0.875rem; }
-        .instructions { margin-top: 1.5rem; color: var(--text-secondary); font-size: .875rem; text-align: left; background-color: var(--bg-light); padding: 1rem; border-radius: 8px;}
-        .instructions h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--text-primary); }
-        .instructions p { margin: 0 0 0.25rem; }
-        .footer { padding: 1.5rem; color: var(--text-secondary); font-size: .8rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+        :root { --bg-light: #f9fafb; --bg-white: #ffffff; --text-primary: #111827; --text-secondary: #6b7280; --accent: #2563eb; --accent-dark: #1d4ed8; --success: #16a34a; --border-color: #e5e7eb;}
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 1.5rem; color: var(--text-primary); }
+        .container { background-color: var(--bg-white); border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1); width: 100%; max-width: 440px; text-align: center; border: 1px solid var(--border-color); }
+        .header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .header h1 { font-size: 1.125rem; font-weight: 600; margin: 0; }
+        .main-content { padding: 1.5rem; }
+        .product-summary { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background-color: var(--bg-light); border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
+        .product-summary span { font-weight: 500; font-size: 0.875rem; }
+        .btn { background-color: var(--accent); color: #fff; border: none; padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1); }
+        .btn:hover { background-color: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1); }
+        .btn:disabled { background-color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-green { background-color: var(--success); }
+        .pix-section { display: none; margin-top: 1.5rem; animation: fadeIn 0.5s ease; }
+        .timer { background-color: #fefce8; color: #a16207; font-weight: 500; padding: .5rem 1rem; border-radius: 99px; display: inline-block; margin-bottom: 1rem; font-size: 0.875rem; }
+        #qr-code-img { border: 1px solid var(--border-color); border-radius: 0.5rem; max-width: 100%; width: 256px; height: 256px; margin: 0 auto; display: block; }
+        .pix-code-wrapper { background-color: var(--bg-light); padding: 0.5rem 0.75rem; border-radius: 0.5rem; margin-top: 1rem; word-break: break-all; text-align: left; font-size: 0.75rem; position: relative; border: 1px solid var(--border-color); }
+        .copy-button { background: var(--bg-white); border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.75rem; font-weight: 500; transition: all 0.2s; }
+        .copy-button:hover { background-color: #f3f4f6; }
+        #copy-feedback { color: var(--success); font-weight: 500; margin-top: .5rem; height: 18px; font-size: 0.875rem; }
+        .instructions { margin-top: 1.5rem; text-align: left; }
+        .step { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .step-number { background-color: var(--accent); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; font-weight: 600; font-size: 0.875rem; flex-shrink: 0;}
+        .footer { padding: 1.5rem; color: var(--text-secondary); font-size: .8rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; border-top: 1px solid var(--border-color); }
         .hidden { display: none; }
         .loader { width: 20px; height: 20px; border: 2px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     <script>
         !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
@@ -44,7 +44,6 @@
     <div class="container">
         <div class="header">
             <h1>Finalize seu Pagamento</h1>
-            <p>Seu pedido está quase pronto!</p>
         </div>
         <div class="main-content">
             <div class="product-summary">
@@ -53,9 +52,8 @@
             </div>
             
             <div id="initial-view">
-                <button id="generate-pix-btn" class="btn">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5a.75.75 0 00-1.5 0v15a.75.75 0 001.5 0V4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5a.75.75 0 00-1.5 0v15a.75.75 0 001.5 0V4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 4.5a.75.75 0 00-1.5 0v15a.75.75 0 001.5 0V4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 4.5a.75.75 0 00-1.5 0v15a.75.75 0 001.5 0V4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M18.75 4.5a.75.75 0 00-1.5 0v15a.75.75 0 001.5 0V4.5z" /></svg>
-                    Gerar PIX Seguro
+                <button id="generate-pix-btn" class="btn btn-green">
+                    Pagar com PIX
                 </button>
             </div>
 
@@ -63,50 +61,53 @@
                 <div class="timer">Seu código expira em: <span id="countdown">10:00</span></div>
                 <img id="qr-code-img" src="" alt="PIX QR Code" class="hidden">
                 <div class="pix-code-wrapper">
-                    <code id="pix-code-text"></code>
+                    <p id="pix-code-text" style="padding-right: 60px;"></p>
                     <button id="copy-btn" class="copy-button">Copiar</button>
                 </div>
                 <div id="copy-feedback"></div>
                 <div class="instructions">
-                    <h3>Siga os 3 passos para pagar:</h3>
-                    <p>1. Copie o código PIX acima.</p>
-                    <p>2. Abra o app do seu banco e pague com a opção "PIX Copia e Cola".</p>
-                    <p>3. Volte aqui e clique no botão abaixo para confirmar.</p>
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <p>Copie o código PIX acima ou escaneie o QR Code.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <p>Abra o app do seu banco e pague com a opção "PIX Copia e Cola".</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <p>Volte aqui e clique no botão abaixo para confirmar.</p>
+                    </div>
                 </div>
-                <button id="check-payment-btn" class="btn btn-secondary mt-4">
+                <button id="check-payment-btn" class="btn mt-4">
                     JÁ PAGUEI, VERIFICAR AGORA
                 </button>
             </div>
         </div>
         <div class="footer">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
-            Pagamento seguro e processado por HotTrack.
+            Ambiente 100% Seguro
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const CONFIG = { API_BASE_URL: 'https://novaapi-one.vercel.app', SELLER_API_KEY: '1a2c5da4-04fb-4eb4-b2d4-55f541360d4f', CHECKOUT_ID: 8, PRODUCT_NAME: 'VIP ISADORA', REDIRECT_URL: 'https://t.me/+bgFpfwqLlYg3N2Qx', VALUE_TYPE: 'fixed', FIXED_VALUE_CENTS: 1990, POLLING_INTERVAL: 4000, TIMER_DURATION_MINUTES: 10 };
-        let clickId = null, transactionId = null, pixCode = '', statusCheckInterval;
+        const CONFIG = { API_BASE_URL: 'https://novaapi-one.vercel.app', SELLER_API_KEY: '1a2c5da4-04fb-4eb4-b2d4-55f541360d4f', CHECKOUT_ID: 9, PRODUCT_NAME: 'VIP ISADORA', REDIRECT_URL: 'https://t.me/+bgFpfwqLlYg3N2Qx', VALUE_TYPE: 'fixed', FIXED_VALUE_CENTS: 1990, POLLING_INTERVAL: 4000, TIMER_DURATION_MINUTES: 10 };
+        let clickId = null, transactionId = null, pixCode = '', statusCheckInterval, timerInterval;
         
         const DOMElements = {
-            productName: document.getElementById('product-name'),
-            productPrice: document.getElementById('product-price'),
-            initialView: document.getElementById('initial-view'),
-            pixSection: document.getElementById('pix-section'),
-            generatePixBtn: document.getElementById('generate-pix-btn'),
-            qrCodeImg: document.getElementById('qr-code-img'),
-            pixCodeText: document.getElementById('pix-code-text'),
-            copyBtn: document.getElementById('copy-btn'),
-            copyFeedback: document.getElementById('copy-feedback'),
-            countdown: document.getElementById('countdown'),
+            productName: document.getElementById('product-name'), productPrice: document.getElementById('product-price'),
+            initialView: document.getElementById('initial-view'), pixSection: document.getElementById('pix-section'),
+            generatePixBtn: document.getElementById('generate-pix-btn'), qrCodeImg: document.getElementById('qr-code-img'),
+            pixCodeText: document.getElementById('pix-code-text'), copyBtn: document.getElementById('copy-btn'),
+            copyFeedback: document.getElementById('copy-feedback'), countdown: document.getElementById('countdown'),
             checkPaymentBtn: document.getElementById('check-payment-btn'),
         };
 
         function displayError(message) { console.error(message); DOMElements.productName.textContent = 'Ocorreu um Erro'; DOMElements.productPrice.textContent = message; DOMElements.initialView.classList.add('hidden'); }
-        function startTimer() { let time = CONFIG.TIMER_DURATION_MINUTES * 60; const timerInterval = setInterval(() => { if (time <= 0) { clearInterval(timerInterval); DOMElements.countdown.textContent = 'Expirado'; return; } time--; const minutes = Math.floor(time / 60).toString().padStart(2, '0'); const seconds = (time % 60).toString().padStart(2, '0'); DOMElements.countdown.textContent = `${minutes}:${seconds}`; }, 1000); }
+        function startTimer() { let time = CONFIG.TIMER_DURATION_MINUTES * 60; timerInterval = setInterval(() => { if (time <= 0) { clearInterval(timerInterval); clearInterval(statusCheckInterval); DOMElements.countdown.textContent = 'Expirado'; return; } time--; const minutes = Math.floor(time / 60).toString().padStart(2, '0'); const seconds = (time % 60).toString().padStart(2, '0'); DOMElements.countdown.textContent = `${minutes}:${seconds}`; }, 1000); }
         async function copyPixCode() { try { await navigator.clipboard.writeText(pixCode); DOMElements.copyFeedback.textContent = 'Código PIX copiado!'; setTimeout(() => DOMElements.copyFeedback.textContent = '', 2000); } catch (err) { DOMElements.copyFeedback.textContent = 'Falha ao copiar'; console.error(err); } }
-        async function checkPaymentStatus(showFeedback = false) { if (!transactionId) return; try { const response = await fetch(`${CONFIG.API_BASE_URL}/api/pix/status/${transactionId}`, { headers: { 'x-api-key': CONFIG.SELLER_API_KEY } }); if (!response.ok) return; const data = await response.json(); if (data.status === 'paid' || data.status === 'COMPLETED') { clearInterval(statusCheckInterval); window.location.href = CONFIG.REDIRECT_URL; } else if (showFeedback) { alert('Pagamento ainda não identificado. Tente novamente em alguns instantes.'); } } catch (error) { console.error('Erro ao verificar status:', error); } }
+        async function checkPaymentStatus(showFeedback = false) { if (!transactionId) return; try { const response = await fetch(`${CONFIG.API_BASE_URL}/api/pix/status/${transactionId}`, { headers: { 'x-api-key': CONFIG.SELLER_API_KEY } }); if (!response.ok) return; const data = await response.json(); if (data.status === 'paid' || data.status === 'COMPLETED') { clearInterval(statusCheckInterval); clearInterval(timerInterval); window.location.href = CONFIG.REDIRECT_URL; } else if (showFeedback) { alert('Pagamento ainda não identificado. Tente novamente em alguns instantes.'); } } catch (error) { console.error('Erro ao verificar status:', error); } }
         
         async function handleGeneratePix() {
             const btn = DOMElements.generatePixBtn;
@@ -117,11 +118,8 @@
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || 'Erro do servidor'); }
                 const data = await response.json();
                 pixCode = data.qr_code_text; transactionId = data.transaction_id;
-                DOMElements.qrCodeImg.src = data.qr_code_base64;
-                DOMElements.pixCodeText.textContent = pixCode;
-                DOMElements.initialView.classList.add('hidden');
-                DOMElements.pixSection.style.display = 'block';
-                DOMElements.qrCodeImg.classList.remove('hidden');
+                DOMElements.qrCodeImg.src = data.qr_code_base64; DOMElements.pixCodeText.textContent = pixCode;
+                DOMElements.initialView.classList.add('hidden'); DOMElements.pixSection.style.display = 'block'; DOMElements.qrCodeImg.classList.remove('hidden');
                 startTimer();
                 statusCheckInterval = setInterval(checkPaymentStatus, CONFIG.POLLING_INTERVAL);
             } catch (error) { displayError(error.message || 'Não foi possível gerar o PIX.'); btn.innerHTML = 'Tentar Novamente'; btn.disabled = false; }
